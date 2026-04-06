@@ -41,6 +41,7 @@ export const PROJECTS = [
   'PVH',
   'Fruitbox',
   'Vulcan',
+  'Internal',
   'Other',
 ] as const
 
