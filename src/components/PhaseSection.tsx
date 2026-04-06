@@ -16,7 +16,8 @@ export function PhaseSection({ phase, skills, isActive, onSelectSkill }: Props) 
 
   useEffect(() => {
     if (isActive && ref.current) {
-      ref.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      const top = ref.current.getBoundingClientRect().top + window.scrollY - 120
+      window.scrollTo({ top, behavior: 'smooth' })
     }
   }, [isActive])
 
