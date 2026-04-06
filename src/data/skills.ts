@@ -9,8 +9,14 @@ export const INITIAL_SKILLS: Skill[] = [
     phase: 'discover',
     intermediateStatus: 'consistently',
     advancedStatus: 'growth-area',
-    seniorIndicators: undefined,
-    growthAreaNote: 'Advanced - facilitating workshops end-to-end and leading discovery sessions independently still developing. Senior level requires leading discovery sessions while identifying requirement dependencies and priorities, and probing deeper into client business processes and unknowns.',
+    seniorStatus: 'not-yet',
+    advancedGrowthNotes: [
+      'Facilitating workshops end-to-end and leading discovery sessions independently still developing',
+    ],
+    seniorGrowthNotes: [
+      'Leading discovery sessions while identifying requirement dependencies and priorities',
+      'Probing deeper into client business processes and unknowns',
+    ],
     examples: [],
   },
   {
@@ -20,7 +26,7 @@ export const INITIAL_SKILLS: Skill[] = [
     phase: 'discover',
     intermediateStatus: 'consistently',
     advancedStatus: 'consistently',
-    seniorIndicators: 'Translates complex processes into clear, actionable technical documentation - TAG DDP workflow and Starshipit config guide are strong evidence.',
+    seniorStatus: 'consistently',
     examples: [],
   },
   {
@@ -30,7 +36,7 @@ export const INITIAL_SKILLS: Skill[] = [
     phase: 'discover',
     intermediateStatus: 'consistently',
     advancedStatus: 'consistently',
-    seniorIndicators: 'Proactively identifies and documents business risks across multiple systems - SparkLayer risk register identifies risk across SparkLayer, Shopify and UAT environment before it became a problem.',
+    seniorStatus: 'consistently',
     examples: [],
   },
 
@@ -42,7 +48,7 @@ export const INITIAL_SKILLS: Skill[] = [
     phase: 'plan',
     intermediateStatus: 'consistently',
     advancedStatus: 'consistently',
-    seniorIndicators: 'Validates scope and timeframes based on delivery context - SparkLayer risk register and SM Wholesale sprint recovery.',
+    seniorStatus: 'consistently',
     examples: [],
   },
   {
@@ -52,7 +58,7 @@ export const INITIAL_SKILLS: Skill[] = [
     phase: 'plan',
     intermediateStatus: 'consistently',
     advancedStatus: 'consistently',
-    seniorIndicators: 'Identifies and drives improvements to Agile processes across projects - Sprint plan app, high level overviews. Leads retrospectives with meaningful insights and action items.',
+    seniorStatus: 'consistently',
     examples: [],
   },
   {
@@ -62,7 +68,7 @@ export const INITIAL_SKILLS: Skill[] = [
     phase: 'plan',
     intermediateStatus: 'consistently',
     advancedStatus: 'consistently',
-    seniorIndicators: 'Encourages uptake within guild and across project teams - Confluence approach and Miro sprint board advocated across projects.',
+    seniorStatus: 'consistently',
     examples: [],
   },
 
@@ -74,8 +80,14 @@ export const INITIAL_SKILLS: Skill[] = [
     phase: 'deliver',
     intermediateStatus: 'consistently',
     advancedStatus: 'partially',
-    seniorIndicators: undefined,
-    growthAreaNote: 'Advanced - partially demonstrated. Delegation and managing others not yet applicable without direct reports. Senior level requires delegating work effectively based on task relevance, capacity, and priority - including handover, ongoing support, review, feedback, and delivery.',
+    seniorStatus: 'not-yet',
+    advancedGrowthNotes: [
+      'Partially demonstrated - delegation and managing others not yet applicable without direct reports',
+    ],
+    seniorGrowthNotes: [
+      'Delegating work effectively based on task relevance, capacity, and priority',
+      'Managing handover, ongoing support, review, feedback, and delivery',
+    ],
     examples: [],
   },
   {
@@ -85,8 +97,12 @@ export const INITIAL_SKILLS: Skill[] = [
     phase: 'deliver',
     intermediateStatus: 'consistently',
     advancedStatus: 'consistently',
-    seniorIndicators: undefined,
-    growthAreaNote: 'Senior - next step is leading other analysts and members of the project team, aligning project work with client and business goals. Requires leading people through mentorship, delegation, and team strategy.',
+    seniorStatus: 'growth-area',
+    seniorGrowthNotes: [
+      'Leading other analysts and members of the project team',
+      'Aligning project work with client and business goals',
+      'Leading people through mentorship, delegation, and team strategy',
+    ],
     examples: [],
   },
   {
@@ -96,8 +112,12 @@ export const INITIAL_SKILLS: Skill[] = [
     phase: 'deliver',
     intermediateStatus: 'consistently',
     advancedStatus: 'consistently',
-    seniorIndicators: undefined,
-    growthAreaNote: 'Senior - next step is communicating complex concepts clearly at scale and mentoring others in impactful communication practices, including contributing to a Quality Plan.',
+    seniorStatus: 'growth-area',
+    seniorGrowthNotes: [
+      'Communicating complex concepts clearly at scale',
+      'Mentoring others in impactful communication practices',
+      'Contributing to a Quality Plan',
+    ],
     examples: [],
   },
 
@@ -109,8 +129,11 @@ export const INITIAL_SKILLS: Skill[] = [
     phase: 'launch',
     intermediateStatus: 'consistently',
     advancedStatus: 'consistently',
-    seniorIndicators: undefined,
-    growthAreaNote: 'Senior - next step is presenting complex ideas and solutions to clients, stakeholders, or internal leadership, and crafting presentations tailored to diverse stakeholder groups that influence decisions.',
+    seniorStatus: 'growth-area',
+    seniorGrowthNotes: [
+      'Presenting complex ideas and solutions to clients, stakeholders, or internal leadership',
+      'Crafting presentations tailored to diverse stakeholder groups that influence decisions',
+    ],
     examples: [],
   },
   {
@@ -120,8 +143,11 @@ export const INITIAL_SKILLS: Skill[] = [
     phase: 'launch',
     intermediateStatus: 'consistently',
     advancedStatus: 'consistently',
-    seniorIndicators: undefined,
-    growthAreaNote: 'Senior - next step is leading Discovery Output documentation to support the RFP process and supporting complex RFPs with deep technical and commercial understanding.',
+    seniorStatus: 'growth-area',
+    seniorGrowthNotes: [
+      'Leading Discovery Output documentation to support the RFP process',
+      'Supporting complex RFPs with deep technical and commercial understanding',
+    ],
     examples: [],
   },
 
@@ -133,8 +159,11 @@ export const INITIAL_SKILLS: Skill[] = [
     phase: 'grow',
     intermediateStatus: 'consistently',
     advancedStatus: 'consistently',
-    seniorIndicators: undefined,
-    growthAreaNote: 'Senior - next step is using learning strategically to uplift delivery outcomes across guilds, and identifying capability gaps in the team to help others close them through guidance and shared resources.',
+    seniorStatus: 'growth-area',
+    seniorGrowthNotes: [
+      'Using learning strategically to uplift delivery outcomes across guilds',
+      'Identifying capability gaps in the team to help others close them through guidance and shared resources',
+    ],
     examples: [],
   },
 ]

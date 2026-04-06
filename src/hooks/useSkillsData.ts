@@ -23,6 +23,8 @@ export function useSkillsData() {
   const [skills, setSkills] = useState<Skill[]>(INITIAL_SKILLS)
   const [loaded, setLoaded] = useState(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Skip the first save trigger (initial load) to avoid overwriting Turso with empty state
+  const skipNextSave = useRef(true)
 
   // Load from API on mount
   useEffect(() => {
@@ -35,9 +37,13 @@ export function useSkillsData() {
       .catch(() => setLoaded(true))
   }, [])
 
-  // Debounced save to API (600ms, same as Sprint-Plan-App)
+  // Debounced save to API (600ms) — skips the initial load trigger
   useEffect(() => {
     if (!loaded) return
+    if (skipNextSave.current) {
+      skipNextSave.current = false
+      return
+    }
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(() => {
       fetch('/api/examples', {
@@ -64,6 +70,16 @@ export function useSkillsData() {
     )
   }, [])
 
+  const updateExample = useCallback((skillId: string, exampleId: string, updates: Partial<Omit<Example, 'id' | 'addedAt'>>) => {
+    setSkills(prev =>
+      prev.map(skill =>
+        skill.id === skillId
+          ? { ...skill, examples: skill.examples.map(e => e.id === exampleId ? { ...e, ...updates } : e) }
+          : skill
+      )
+    )
+  }, [])
+
   const removeExample = useCallback((skillId: string, exampleId: string) => {
     setSkills(prev =>
       prev.map(skill =>
@@ -74,5 +90,5 @@ export function useSkillsData() {
     )
   }, [])
 
-  return { skills, addExample, removeExample }
+  return { skills, addExample, updateExample, removeExample }
 }

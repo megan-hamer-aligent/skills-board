@@ -1,16 +1,18 @@
-import { useEffect } from 'react'
+'use client'
+import { useEffect, useState } from 'react'
 import type { Example, Skill } from '../types'
-import { STATUS_META, PHASE_META } from '../types'
+import { STATUS_META, PHASE_META, PROJECTS } from '../types'
 import { ExampleForm } from './ExampleForm'
 
 type Props = {
   skill: Skill | null
   onClose: () => void
   onAddExample: (skillId: string, example: Omit<Example, 'id' | 'addedAt'>) => void
+  onUpdateExample: (skillId: string, exampleId: string, updates: Partial<Omit<Example, 'id' | 'addedAt'>>) => void
   onRemoveExample: (skillId: string, exampleId: string) => void
 }
 
-export function ExampleDrawer({ skill, onClose, onAddExample, onRemoveExample }: Props) {
+export function ExampleDrawer({ skill, onClose, onAddExample, onUpdateExample, onRemoveExample }: Props) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
@@ -24,6 +26,14 @@ export function ExampleDrawer({ skill, onClose, onAddExample, onRemoveExample }:
   const phaseMeta = PHASE_META[skill.phase]
   const intMeta = STATUS_META[skill.intermediateStatus]
   const advMeta = STATUS_META[skill.advancedStatus]
+  const senMeta = STATUS_META[skill.seniorStatus]
+
+  // Only show the next level's growth notes
+  const growthLevel = skill.advancedStatus !== 'consistently'
+    ? { label: 'Advanced - growth area', notes: skill.advancedGrowthNotes }
+    : skill.seniorStatus !== 'consistently'
+    ? { label: 'Senior - growth area', notes: skill.seniorGrowthNotes }
+    : null
 
   return (
     <>
@@ -92,41 +102,32 @@ export function ExampleDrawer({ skill, onClose, onAddExample, onRemoveExample }:
                 {advMeta.label}
               </span>
             </div>
-            {skill.seniorIndicators && (
-              <div className="flex flex-col gap-0.5">
-                <span className="text-xs" style={{ color: 'rgba(1,13,45,0.4)' }}>Senior</span>
-                <span
-                  className="text-xs px-2 py-0.5 rounded-full font-medium"
-                  style={{ backgroundColor: '#010D2D', color: '#DA61F1' }}
-                >
-                  Evidenced
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Senior indicators */}
-          {skill.seniorIndicators && (
-            <div
-              className="mt-3 p-3 rounded-xl"
-              style={{ backgroundColor: 'rgba(1,13,45,0.08)', border: '1px solid rgba(1,13,45,0.15)' }}
-            >
-              <p className="text-xs font-bold mb-0.5" style={{ color: '#010D2D' }}>Senior indicator</p>
-              <p className="text-xs leading-relaxed" style={{ color: 'rgba(1,13,45,0.7)' }}>{skill.seniorIndicators}</p>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs" style={{ color: 'rgba(1,13,45,0.4)' }}>Senior</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${senMeta.color}`}>
+                {senMeta.label}
+              </span>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Examples list */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          {/* Growth area note */}
-          {skill.growthAreaNote && (
+          {/* Growth area note — next level only */}
+          {growthLevel?.notes && growthLevel.notes.length > 0 && (
             <div
               className="p-3 rounded-xl"
               style={{ backgroundColor: 'rgba(1,13,45,0.04)', border: '1px solid rgba(1,13,45,0.1)' }}
             >
-              <p className="text-xs font-bold mb-0.5" style={{ color: '#010D2D' }}>Growth area</p>
-              <p className="text-xs leading-relaxed" style={{ color: 'rgba(1,13,45,0.7)' }}>{skill.growthAreaNote}</p>
+              <p className="text-xs font-bold mb-1.5" style={{ color: '#010D2D' }}>{growthLevel.label}</p>
+              <ul className="space-y-1">
+                {growthLevel.notes.map((note, i) => (
+                  <li key={i} className="flex gap-2 text-xs leading-relaxed" style={{ color: 'rgba(1,13,45,0.7)' }}>
+                    <span style={{ color: '#DA61F1', flexShrink: 0 }}>-</span>
+                    <span>{note}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 
@@ -147,6 +148,7 @@ export function ExampleDrawer({ skill, onClose, onAddExample, onRemoveExample }:
               key={ex.id}
               example={ex}
               onRemove={() => onRemoveExample(skill.id, ex.id)}
+              onUpdate={updates => onUpdateExample(skill.id, ex.id, updates)}
             />
           ))}
 
@@ -159,52 +161,134 @@ export function ExampleDrawer({ skill, onClose, onAddExample, onRemoveExample }:
   )
 }
 
-function ExampleCard({ example, onRemove }: { example: Example; onRemove: () => void }) {
+type CardProps = {
+  example: Example
+  onRemove: () => void
+  onUpdate: (updates: Partial<Omit<Example, 'id' | 'addedAt'>>) => void
+}
+
+const inputStyle = {
+  width: '100%',
+  fontSize: '0.8125rem',
+  border: '1px solid rgba(1,13,45,0.15)',
+  borderRadius: '6px',
+  padding: '6px 10px',
+  backgroundColor: '#FAF8F6',
+  color: '#010D2D',
+  outline: 'none',
+  fontFamily: 'Manrope, sans-serif',
+}
+
+const labelStyle: React.CSSProperties = {
+  fontSize: '0.7rem',
+  fontWeight: 700,
+  color: 'rgba(1,13,45,0.5)',
+  display: 'block',
+  marginBottom: '3px',
+  fontFamily: 'Manrope, sans-serif',
+}
+
+function ExampleCard({ example, onRemove, onUpdate }: CardProps) {
+  const [editing, setEditing] = useState(false)
+  const [form, setForm] = useState({
+    title: example.title,
+    notes: example.notes,
+    url: example.url ?? '',
+    project: example.project,
+  })
+
+  function set(field: keyof typeof form, value: string) {
+    setForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  function handleSave(e: React.FormEvent) {
+    e.preventDefault()
+    onUpdate({
+      title: form.title.trim(),
+      notes: form.notes.trim(),
+      url: form.url.trim() || undefined,
+      project: form.project,
+    })
+    setEditing(false)
+  }
+
+  function handleCancel() {
+    setForm({ title: example.title, notes: example.notes, url: example.url ?? '', project: example.project })
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <form
+        onSubmit={handleSave}
+        className="rounded-xl p-4 space-y-3"
+        style={{ backgroundColor: '#FAF8F6', border: '1px solid rgba(218,97,241,0.3)' }}
+      >
+        <div>
+          <label style={labelStyle}>Title *</label>
+          <input type="text" value={form.title} onChange={e => set('title', e.target.value)} style={inputStyle} required />
+        </div>
+        <div>
+          <label style={labelStyle}>Notes</label>
+          <textarea value={form.notes} onChange={e => set('notes', e.target.value)} rows={3} style={{ ...inputStyle, resize: 'none' as const }} />
+        </div>
+        <div>
+          <label style={labelStyle}>Link (Confluence, Figma, Miro, Jira etc)</label>
+          <input type="url" value={form.url} onChange={e => set('url', e.target.value)} placeholder="https://..." style={inputStyle} />
+        </div>
+        <div>
+          <label style={labelStyle}>Project</label>
+          <select value={form.project} onChange={e => set('project', e.target.value)} style={inputStyle}>
+            <option value="">Select project...</option>
+            {PROJECTS.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
+        <div className="flex gap-2 pt-1">
+          <button type="submit" className="flex-1 text-xs font-bold py-2 rounded-lg cursor-pointer hover:opacity-90" style={{ backgroundColor: '#010D2D', color: '#FAF8F6' }}>
+            Save
+          </button>
+          <button type="button" onClick={handleCancel} className="px-4 text-xs font-medium rounded-lg cursor-pointer hover:opacity-70" style={{ border: '1px solid rgba(1,13,45,0.2)', color: '#010D2D', backgroundColor: 'transparent' }}>
+            Cancel
+          </button>
+          <button type="button" onClick={onRemove} className="px-3 text-xs font-medium rounded-lg cursor-pointer hover:opacity-70" style={{ border: '1px solid rgba(220,38,38,0.3)', color: 'rgb(185,28,28)', backgroundColor: 'transparent' }}>
+            Delete
+          </button>
+        </div>
+      </form>
+    )
+  }
+
   return (
     <div
-      className="rounded-xl p-4 relative group"
+      className="rounded-xl p-4 cursor-pointer transition-all duration-150 group"
       style={{ backgroundColor: '#FAF8F6', border: '1px solid rgba(1,13,45,0.1)' }}
+      onClick={() => setEditing(true)}
+      onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(218,97,241,0.35)')}
+      onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(1,13,45,0.1)')}
+      title="Click to edit"
     >
-      <button
-        onClick={onRemove}
-        className="absolute top-2 right-2 text-xl leading-none opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:opacity-70"
-        style={{ color: 'rgba(1,13,45,0.3)' }}
-        title="Remove example"
-      >
-        ×
-      </button>
+      <div className="flex items-start justify-between gap-2">
+        <h4 className="text-sm font-bold leading-snug mb-1" style={{ color: '#010D2D' }}>
+          {example.url ? (
+            <a
+              href={example.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:opacity-70"
+              style={{ color: '#DA61F1' }}
+              onClick={e => e.stopPropagation()}
+            >
+              {example.title} ↗
+            </a>
+          ) : (
+            example.title
+          )}
+        </h4>
+        <span className="text-xs opacity-0 group-hover:opacity-40 transition-opacity flex-shrink-0" style={{ color: '#010D2D' }}>
+          edit
+        </span>
+      </div>
 
-      {/* Image thumbnail */}
-      {example.imageUrl && (
-        <a href={example.url || example.imageUrl} target="_blank" rel="noopener noreferrer">
-          <img
-            src={example.imageUrl}
-            alt={example.title}
-            className="w-full rounded-lg mb-3 max-h-32 object-cover transition-opacity hover:opacity-90"
-            style={{ border: '1px solid rgba(1,13,45,0.08)' }}
-            onError={e => (e.currentTarget.style.display = 'none')}
-          />
-        </a>
-      )}
-
-      {/* Title */}
-      <h4 className="text-sm font-bold leading-snug mb-1" style={{ color: '#010D2D' }}>
-        {example.url ? (
-          <a
-            href={example.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition-colors hover:opacity-70"
-            style={{ color: '#DA61F1' }}
-          >
-            {example.title} ↗
-          </a>
-        ) : (
-          example.title
-        )}
-      </h4>
-
-      {/* Project tag */}
       {example.project && (
         <span
           className="inline-block text-xs px-2 py-0.5 rounded-full font-medium mb-2"
@@ -214,14 +298,12 @@ function ExampleCard({ example, onRemove }: { example: Example; onRemove: () => 
         </span>
       )}
 
-      {/* Notes */}
       {example.notes && (
         <p className="text-xs leading-relaxed mt-1" style={{ color: 'rgba(1,13,45,0.6)' }}>
           {example.notes}
         </p>
       )}
 
-      {/* Date */}
       <p className="text-xs mt-2" style={{ color: 'rgba(1,13,45,0.3)' }}>
         Added {new Date(example.addedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
       </p>

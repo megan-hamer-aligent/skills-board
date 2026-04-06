@@ -25,8 +25,9 @@ export type Skill = {
   phase: Phase
   intermediateStatus: Status
   advancedStatus: Status
-  seniorIndicators?: string
-  growthAreaNote?: string
+  seniorStatus: Status
+  advancedGrowthNotes?: string[]
+  seniorGrowthNotes?: string[]
   examples: Example[]
 }
 

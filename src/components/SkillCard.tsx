@@ -13,9 +13,9 @@ export function SkillCard({ skill, onClick }: Props) {
   const meta = PHASE_META[skill.phase]
   const exCount = skill.examples.length
 
-  const intReached = skill.intermediateStatus === 'consistently' || skill.intermediateStatus === 'partially'
-  const advReached = skill.advancedStatus === 'consistently' || skill.advancedStatus === 'partially'
-  const seniorReached = !!skill.seniorIndicators
+  const intReached = skill.intermediateStatus === 'consistently'
+  const advReached = skill.advancedStatus === 'consistently'
+  const seniorReached = skill.seniorStatus === 'consistently'
 
   const levels = [
     { label: 'Intermediate', reached: intReached },
