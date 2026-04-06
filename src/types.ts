@@ -33,7 +33,7 @@ export type Skill = {
 
 export const PROJECTS = [
   'TAG Body Art',
-  'GSM Retail',
+  'GSM Retail Group',
   'Mitsubishi',
   'Sime - TWL',
   'APS Industrial',
