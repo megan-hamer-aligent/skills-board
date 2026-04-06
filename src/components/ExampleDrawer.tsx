@@ -1,20 +1,22 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Example, Skill } from '../types'
 import { STATUS_META, PHASE_META, PROJECTS } from '../types'
 import { ExampleForm } from './ExampleForm'
 
 type Props = {
   skill: Skill | null
-  allSkills: Skill[]
   onClose: () => void
   onAddExample: (skillId: string, example: Omit<Example, 'id' | 'addedAt'>) => void
   onUpdateExample: (skillId: string, exampleId: string, updates: Partial<Omit<Example, 'id' | 'addedAt'>>) => void
   onRemoveExample: (skillId: string, exampleId: string) => void
-  onMoveExample: (fromSkillId: string, exampleId: string, toSkillId: string) => void
+  onReorderExamples: (skillId: string, fromIndex: number, toIndex: number) => void
 }
 
-export function ExampleDrawer({ skill, allSkills, onClose, onAddExample, onUpdateExample, onRemoveExample, onMoveExample }: Props) {
+export function ExampleDrawer({ skill, onClose, onAddExample, onUpdateExample, onRemoveExample, onReorderExamples }: Props) {
+  const dragIndex = useRef<number | null>(null)
+  const [dropTarget, setDropTarget] = useState<number | null>(null)
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
@@ -30,23 +32,42 @@ export function ExampleDrawer({ skill, allSkills, onClose, onAddExample, onUpdat
   const advMeta = STATUS_META[skill.advancedStatus]
   const senMeta = STATUS_META[skill.seniorStatus]
 
-  // Only show the next level's growth notes
   const growthLevel = skill.advancedStatus !== 'consistently'
     ? { label: 'Advanced - growth area', notes: skill.advancedGrowthNotes }
     : skill.seniorStatus !== 'consistently'
     ? { label: 'Senior - growth area', notes: skill.seniorGrowthNotes }
     : null
 
+  function handleDragStart(index: number) {
+    dragIndex.current = index
+  }
+
+  function handleDragOver(e: React.DragEvent, index: number) {
+    e.preventDefault()
+    setDropTarget(index)
+  }
+
+  function handleDrop(toIndex: number) {
+    if (dragIndex.current !== null && dragIndex.current !== toIndex) {
+      onReorderExamples(skill!.id, dragIndex.current, toIndex)
+    }
+    dragIndex.current = null
+    setDropTarget(null)
+  }
+
+  function handleDragEnd() {
+    dragIndex.current = null
+    setDropTarget(null)
+  }
+
   return (
     <>
-      {/* Backdrop */}
       <div
         className="fixed inset-0 z-30 transition-opacity"
         style={{ backgroundColor: 'rgba(1,13,45,0.4)' }}
         onClick={onClose}
       />
 
-      {/* Drawer */}
       <div
         className="fixed right-0 top-0 h-full w-full max-w-lg z-40 shadow-2xl flex flex-col overflow-hidden"
         style={{ backgroundColor: '#FAF8F6' }}
@@ -60,17 +81,11 @@ export function ExampleDrawer({ skill, allSkills, onClose, onAddExample, onUpdat
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-base">{phaseMeta.icon}</span>
-                <span
-                  className="text-xs font-bold tracking-wide uppercase"
-                  style={{ color: '#010D2D' }}
-                >
+                <span className="text-xs font-bold tracking-wide uppercase" style={{ color: '#010D2D' }}>
                   {phaseMeta.label}
                 </span>
               </div>
-              <h2
-                className="text-lg font-bold"
-                style={{ color: '#010D2D', fontFamily: 'Manrope, sans-serif' }}
-              >
+              <h2 className="text-lg font-bold" style={{ color: '#010D2D', fontFamily: 'Manrope, sans-serif' }}>
                 {skill.name}
               </h2>
             </div>
@@ -83,45 +98,30 @@ export function ExampleDrawer({ skill, allSkills, onClose, onAddExample, onUpdat
             </button>
           </div>
 
-          <p
-            className="text-sm mt-2 leading-relaxed"
-            style={{ color: 'rgba(1,13,45,0.6)' }}
-          >
+          <p className="text-sm mt-2 leading-relaxed" style={{ color: 'rgba(1,13,45,0.6)' }}>
             {skill.summary}
           </p>
 
-          {/* Status badges */}
           <div className="flex flex-wrap gap-3 mt-3">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-xs" style={{ color: 'rgba(1,13,45,0.4)' }}>Intermediate</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${intMeta.color}`}>
-                {intMeta.label}
-              </span>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-xs" style={{ color: 'rgba(1,13,45,0.4)' }}>Advanced</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${advMeta.color}`}>
-                {advMeta.label}
-              </span>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-xs" style={{ color: 'rgba(1,13,45,0.4)' }}>Senior</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${senMeta.color}`}>
-                {senMeta.label}
-              </span>
-            </div>
+            {[
+              { label: 'Intermediate', meta: intMeta },
+              { label: 'Advanced', meta: advMeta },
+              { label: 'Senior', meta: senMeta },
+            ].map(({ label, meta }) => (
+              <div key={label} className="flex flex-col gap-0.5">
+                <span className="text-xs" style={{ color: 'rgba(1,13,45,0.4)' }}>{label}</span>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${meta.color}`}>{meta.label}</span>
+              </div>
+            ))}
             <div className="flex flex-col gap-0.5">
               <span className="text-xs" style={{ color: 'rgba(1,13,45,0.4)' }}>Expert</span>
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium text-slate-400 bg-slate-100">
-                Not Yet
-              </span>
+              <span className="text-xs px-2 py-0.5 rounded-full font-medium text-slate-400 bg-slate-100">Not Yet</span>
             </div>
           </div>
         </div>
 
-        {/* Examples list */}
+        {/* Body */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          {/* Growth area note — next level only */}
           {growthLevel?.notes && growthLevel.notes.length > 0 && (
             <div
               className="p-3 rounded-xl"
@@ -139,11 +139,9 @@ export function ExampleDrawer({ skill, allSkills, onClose, onAddExample, onUpdat
             </div>
           )}
 
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold" style={{ color: '#010D2D' }}>
-              Examples ({skill.examples.length})
-            </h3>
-          </div>
+          <h3 className="text-sm font-bold" style={{ color: '#010D2D' }}>
+            Examples ({skill.examples.length})
+          </h3>
 
           {skill.examples.length === 0 && (
             <p className="text-sm italic py-2" style={{ color: 'rgba(1,13,45,0.35)' }}>
@@ -151,20 +149,32 @@ export function ExampleDrawer({ skill, allSkills, onClose, onAddExample, onUpdat
             </p>
           )}
 
-          {skill.examples.map(ex => (
-            <ExampleCard
+          {skill.examples.map((ex, index) => (
+            <div
               key={ex.id}
-              example={ex}
-              otherSkills={allSkills.filter(s => s.id !== skill.id)}
-              onRemove={() => onRemoveExample(skill.id, ex.id)}
-              onUpdate={updates => onUpdateExample(skill.id, ex.id, updates)}
-              onMove={toSkillId => onMoveExample(skill.id, ex.id, toSkillId)}
-            />
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={e => handleDragOver(e, index)}
+              onDrop={() => handleDrop(index)}
+              onDragEnd={handleDragEnd}
+              style={{
+                opacity: dragIndex.current === index ? 0.4 : 1,
+                outline: dropTarget === index && dragIndex.current !== index
+                  ? '2px solid rgba(218,97,241,0.5)'
+                  : 'none',
+                borderRadius: '12px',
+                transition: 'opacity 0.15s',
+              }}
+            >
+              <ExampleCard
+                example={ex}
+                onRemove={() => onRemoveExample(skill.id, ex.id)}
+                onUpdate={updates => onUpdateExample(skill.id, ex.id, updates)}
+              />
+            </div>
           ))}
 
-          <ExampleForm
-            onAdd={example => onAddExample(skill.id, example)}
-          />
+          <ExampleForm onAdd={example => onAddExample(skill.id, example)} />
         </div>
       </div>
     </>
@@ -173,10 +183,8 @@ export function ExampleDrawer({ skill, allSkills, onClose, onAddExample, onUpdat
 
 type CardProps = {
   example: Example
-  otherSkills: Skill[]
   onRemove: () => void
   onUpdate: (updates: Partial<Omit<Example, 'id' | 'addedAt'>>) => void
-  onMove: (toSkillId: string) => void
 }
 
 const inputStyle = {
@@ -200,7 +208,26 @@ const labelStyle: React.CSSProperties = {
   fontFamily: 'Manrope, sans-serif',
 }
 
-function ExampleCard({ example, otherSkills, onRemove, onUpdate, onMove }: CardProps) {
+function NotesDisplay({ notes }: { notes: string }) {
+  return (
+    <div className="text-xs leading-relaxed mt-1 space-y-0.5" style={{ color: 'rgba(1,13,45,0.6)' }}>
+      {notes.split('\n').map((line, i) => {
+        const match = line.match(/^([•·\-*])\s*(.+)$/)
+        if (match) {
+          return (
+            <div key={i} className="flex gap-1.5">
+              <span style={{ flexShrink: 0, marginTop: '0px' }}>{match[1]}</span>
+              <span>{match[2]}</span>
+            </div>
+          )
+        }
+        return <p key={i}>{line || '\u00A0'}</p>
+      })}
+    </div>
+  )
+}
+
+function ExampleCard({ example, onRemove, onUpdate }: CardProps) {
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState({
     title: example.title,
@@ -208,7 +235,6 @@ function ExampleCard({ example, otherSkills, onRemove, onUpdate, onMove }: CardP
     url: example.url ?? '',
     project: example.project,
   })
-  const [moveToSkillId, setMoveToSkillId] = useState('')
 
   function set(field: keyof typeof form, value: string) {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -216,10 +242,6 @@ function ExampleCard({ example, otherSkills, onRemove, onUpdate, onMove }: CardP
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    if (moveToSkillId) {
-      onMove(moveToSkillId)
-      return
-    }
     onUpdate({
       title: form.title.trim(),
       notes: form.notes.trim(),
@@ -231,7 +253,6 @@ function ExampleCard({ example, otherSkills, onRemove, onUpdate, onMove }: CardP
 
   function handleCancel() {
     setForm({ title: example.title, notes: example.notes, url: example.url ?? '', project: example.project })
-    setMoveToSkillId('')
     setEditing(false)
   }
 
@@ -248,7 +269,7 @@ function ExampleCard({ example, otherSkills, onRemove, onUpdate, onMove }: CardP
         </div>
         <div>
           <label style={labelStyle}>Notes</label>
-          <textarea value={form.notes} onChange={e => set('notes', e.target.value)} rows={3} style={{ ...inputStyle, resize: 'none' as const }} />
+          <textarea value={form.notes} onChange={e => set('notes', e.target.value)} rows={4} style={{ ...inputStyle, resize: 'none' as const }} />
         </div>
         <div>
           <label style={labelStyle}>Link (Confluence, Figma, Miro, Jira etc)</label>
@@ -261,22 +282,9 @@ function ExampleCard({ example, otherSkills, onRemove, onUpdate, onMove }: CardP
             {PROJECTS.map(p => <option key={p} value={p}>{p}</option>)}
           </select>
         </div>
-        <div>
-          <label style={labelStyle}>Move to another skill</label>
-          <select value={moveToSkillId} onChange={e => setMoveToSkillId(e.target.value)} style={inputStyle}>
-            <option value="">— stay here —</option>
-            {otherSkills.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </select>
-          {moveToSkillId && (
-            <p className="text-xs mt-1" style={{ color: 'rgba(218,97,241,0.8)' }}>
-              This example will move to {otherSkills.find(s => s.id === moveToSkillId)?.name}
-            </p>
-          )}
-        </div>
-
         <div className="flex gap-2 pt-1">
           <button type="submit" className="flex-1 text-xs font-bold py-2 rounded-lg cursor-pointer hover:opacity-90" style={{ backgroundColor: '#010D2D', color: '#FAF8F6' }}>
-            {moveToSkillId ? 'Move' : 'Save'}
+            Save
           </button>
           <button type="button" onClick={handleCancel} className="px-4 text-xs font-medium rounded-lg cursor-pointer hover:opacity-70" style={{ border: '1px solid rgba(1,13,45,0.2)', color: '#010D2D', backgroundColor: 'transparent' }}>
             Cancel
@@ -296,7 +304,7 @@ function ExampleCard({ example, otherSkills, onRemove, onUpdate, onMove }: CardP
       onClick={() => setEditing(true)}
       onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(218,97,241,0.35)')}
       onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(1,13,45,0.1)')}
-      title="Click to edit"
+      title="Click to edit · Drag to reorder"
     >
       <div className="flex items-start justify-between gap-2">
         <h4 className="text-sm font-bold leading-snug mb-1" style={{ color: '#010D2D' }}>
@@ -315,8 +323,8 @@ function ExampleCard({ example, otherSkills, onRemove, onUpdate, onMove }: CardP
             example.title
           )}
         </h4>
-        <span className="text-xs opacity-0 group-hover:opacity-40 transition-opacity flex-shrink-0" style={{ color: '#010D2D' }}>
-          edit
+        <span className="text-xs opacity-0 group-hover:opacity-30 transition-opacity flex-shrink-0 select-none" style={{ color: '#010D2D' }}>
+          ⠿
         </span>
       </div>
 
@@ -329,13 +337,7 @@ function ExampleCard({ example, otherSkills, onRemove, onUpdate, onMove }: CardP
         </span>
       )}
 
-      {example.notes && (
-        <div className="text-xs leading-relaxed mt-1 space-y-0.5" style={{ color: 'rgba(1,13,45,0.6)' }}>
-          {example.notes.split('\n').map((line, i) => (
-            <p key={i}>{line || '\u00A0'}</p>
-          ))}
-        </div>
-      )}
+      {example.notes && <NotesDisplay notes={example.notes} />}
 
       <p className="text-xs mt-2" style={{ color: 'rgba(1,13,45,0.3)' }}>
         Added {new Date(example.addedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
