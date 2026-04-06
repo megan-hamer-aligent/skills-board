@@ -305,9 +305,11 @@ function ExampleCard({ example, onRemove, onUpdate }: CardProps) {
       )}
 
       {example.notes && (
-        <p className="text-xs leading-relaxed mt-1" style={{ color: 'rgba(1,13,45,0.6)' }}>
-          {example.notes}
-        </p>
+        <div className="text-xs leading-relaxed mt-1 space-y-0.5" style={{ color: 'rgba(1,13,45,0.6)' }}>
+          {example.notes.split('\n').map((line, i) => (
+            <p key={i}>{line || '\u00A0'}</p>
+          ))}
+        </div>
       )}
 
       <p className="text-xs mt-2" style={{ color: 'rgba(1,13,45,0.3)' }}>
