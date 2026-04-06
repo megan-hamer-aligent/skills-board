@@ -7,6 +7,7 @@ import { PhaseIcon } from './PhaseIcon'
 
 type Props = {
   skill: Skill | null
+  canEdit: boolean
   onClose: () => void
   onAddExample: (skillId: string, example: Omit<Example, 'id' | 'addedAt'>) => void
   onUpdateExample: (skillId: string, exampleId: string, updates: Partial<Omit<Example, 'id' | 'addedAt'>>) => void
@@ -14,7 +15,7 @@ type Props = {
   onReorderExamples: (skillId: string, fromIndex: number, toIndex: number) => void
 }
 
-export function ExampleDrawer({ skill, onClose, onAddExample, onUpdateExample, onRemoveExample, onReorderExamples }: Props) {
+export function ExampleDrawer({ skill, canEdit, onClose, onAddExample, onUpdateExample, onRemoveExample, onReorderExamples }: Props) {
   const dragIndex = useRef<number | null>(null)
   const [dropTarget, setDropTarget] = useState<number | null>(null)
 
@@ -153,14 +154,14 @@ export function ExampleDrawer({ skill, onClose, onAddExample, onUpdateExample, o
           {skill.examples.map((ex, index) => (
             <div
               key={ex.id}
-              draggable
-              onDragStart={() => handleDragStart(index)}
-              onDragOver={e => handleDragOver(e, index)}
-              onDrop={() => handleDrop(index)}
-              onDragEnd={handleDragEnd}
+              draggable={canEdit}
+              onDragStart={canEdit ? () => handleDragStart(index) : undefined}
+              onDragOver={canEdit ? e => handleDragOver(e, index) : undefined}
+              onDrop={canEdit ? () => handleDrop(index) : undefined}
+              onDragEnd={canEdit ? handleDragEnd : undefined}
               style={{
                 opacity: dragIndex.current === index ? 0.4 : 1,
-                outline: dropTarget === index && dragIndex.current !== index
+                outline: canEdit && dropTarget === index && dragIndex.current !== index
                   ? '2px solid rgba(218,97,241,0.5)'
                   : 'none',
                 borderRadius: '12px',
@@ -169,13 +170,14 @@ export function ExampleDrawer({ skill, onClose, onAddExample, onUpdateExample, o
             >
               <ExampleCard
                 example={ex}
+                canEdit={canEdit}
                 onRemove={() => onRemoveExample(skill.id, ex.id)}
                 onUpdate={updates => onUpdateExample(skill.id, ex.id, updates)}
               />
             </div>
           ))}
 
-          <ExampleForm onAdd={example => onAddExample(skill.id, example)} />
+          {canEdit && <ExampleForm onAdd={example => onAddExample(skill.id, example)} />}
         </div>
       </div>
     </>
@@ -184,6 +186,7 @@ export function ExampleDrawer({ skill, onClose, onAddExample, onUpdateExample, o
 
 type CardProps = {
   example: Example
+  canEdit: boolean
   onRemove: () => void
   onUpdate: (updates: Partial<Omit<Example, 'id' | 'addedAt'>>) => void
 }
@@ -228,7 +231,7 @@ function NotesDisplay({ notes }: { notes: string }) {
   )
 }
 
-function ExampleCard({ example, onRemove, onUpdate }: CardProps) {
+function ExampleCard({ example, canEdit, onRemove, onUpdate }: CardProps) {
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState({
     title: example.title,
@@ -300,12 +303,12 @@ function ExampleCard({ example, onRemove, onUpdate }: CardProps) {
 
   return (
     <div
-      className="rounded-xl p-4 cursor-pointer transition-all duration-150 group"
+      className={`rounded-xl p-4 transition-all duration-150 group ${canEdit ? 'cursor-pointer' : ''}`}
       style={{ backgroundColor: '#FAF8F6', border: '1px solid rgba(1,13,45,0.1)' }}
-      onClick={() => setEditing(true)}
-      onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(218,97,241,0.35)')}
-      onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(1,13,45,0.1)')}
-      title="Click to edit · Drag to reorder"
+      onClick={canEdit ? () => setEditing(true) : undefined}
+      onMouseEnter={canEdit ? e => (e.currentTarget.style.borderColor = 'rgba(218,97,241,0.35)') : undefined}
+      onMouseLeave={canEdit ? e => (e.currentTarget.style.borderColor = 'rgba(1,13,45,0.1)') : undefined}
+      title={canEdit ? 'Click to edit · Drag to reorder' : undefined}
     >
       <div className="flex items-start justify-between gap-2">
         <h4 className="text-sm font-bold leading-snug mb-1" style={{ color: '#010D2D' }}>
@@ -324,9 +327,11 @@ function ExampleCard({ example, onRemove, onUpdate }: CardProps) {
             example.title
           )}
         </h4>
-        <span className="text-xs opacity-0 group-hover:opacity-30 transition-opacity flex-shrink-0 select-none" style={{ color: '#010D2D' }}>
-          ⠿
-        </span>
+        {canEdit && (
+          <span className="text-xs opacity-0 group-hover:opacity-30 transition-opacity flex-shrink-0 select-none" style={{ color: '#010D2D' }}>
+            ⠿
+          </span>
+        )}
       </div>
 
       {example.project && (
