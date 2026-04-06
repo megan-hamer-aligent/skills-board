@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+/* Aligent brand colours */
+:root {
+  --depth:        #010D2D;
+  --depth-80:     #343D57;
+  --clarity:      #FAF8F6;
+  --imagination:  #DA61F1;
+  --imag-40:      #F0C0F9;
+  --imag-20:      #F8DFFC;
+}
+
+* {
+  box-sizing: border-box;
+  letter-spacing: -0.01em;
+}
+
+body {
+  margin: 0;
+  font-family: 'Manrope', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 500;
+  background-color: var(--clarity);
+  color: var(--depth);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-display {
+  font-family: 'Georgia', serif;
+  font-weight: 300;
+}
