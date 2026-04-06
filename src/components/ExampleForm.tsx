@@ -8,7 +8,6 @@ const EMPTY: FormState = {
   title: '',
   notes: '',
   url: '',
-  imageUrl: '',
   project: '',
 }
 
@@ -52,7 +51,6 @@ export function ExampleForm({ onAdd }: Props) {
       title: form.title.trim(),
       notes: form.notes.trim(),
       url: form.url?.trim() || undefined,
-      imageUrl: form.imageUrl?.trim() || undefined,
       project: form.project,
     })
     setForm(EMPTY)
@@ -116,7 +114,7 @@ export function ExampleForm({ onAdd }: Props) {
       </div>
 
       <div>
-        <label style={labelStyle}>Link (Confluence, Miro, Jira...)</label>
+        <label style={labelStyle}>Link (Confluence, Figma, Miro, Jira etc)</label>
         <input
           type="url"
           value={form.url}
@@ -124,26 +122,6 @@ export function ExampleForm({ onAdd }: Props) {
           placeholder="https://..."
           style={inputStyle}
         />
-      </div>
-
-      <div>
-        <label style={labelStyle}>Image URL (thumbnail linking to URL)</label>
-        <input
-          type="url"
-          value={form.imageUrl}
-          onChange={e => set('imageUrl', e.target.value)}
-          placeholder="https://... (paste image link)"
-          style={inputStyle}
-        />
-        {form.imageUrl && (
-          <img
-            src={form.imageUrl}
-            alt="Preview"
-            className="mt-2 rounded-lg max-h-24 object-cover"
-            style={{ border: '1px solid rgba(1,13,45,0.1)' }}
-            onError={e => (e.currentTarget.style.display = 'none')}
-          />
-        )}
       </div>
 
       <div>

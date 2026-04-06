@@ -34,7 +34,7 @@ export const PROJECTS = [
   'TAG Body Art',
   'GSM Retail',
   'Mitsubishi',
-  'SM Wholesale',
+  'Sime - TWL',
   'APS Industrial',
   'Laser Clinics',
   'PVH',
