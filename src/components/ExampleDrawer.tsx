@@ -6,13 +6,15 @@ import { ExampleForm } from './ExampleForm'
 
 type Props = {
   skill: Skill | null
+  allSkills: Skill[]
   onClose: () => void
   onAddExample: (skillId: string, example: Omit<Example, 'id' | 'addedAt'>) => void
   onUpdateExample: (skillId: string, exampleId: string, updates: Partial<Omit<Example, 'id' | 'addedAt'>>) => void
   onRemoveExample: (skillId: string, exampleId: string) => void
+  onMoveExample: (fromSkillId: string, exampleId: string, toSkillId: string) => void
 }
 
-export function ExampleDrawer({ skill, onClose, onAddExample, onUpdateExample, onRemoveExample }: Props) {
+export function ExampleDrawer({ skill, allSkills, onClose, onAddExample, onUpdateExample, onRemoveExample, onMoveExample }: Props) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
@@ -153,8 +155,10 @@ export function ExampleDrawer({ skill, onClose, onAddExample, onUpdateExample, o
             <ExampleCard
               key={ex.id}
               example={ex}
+              otherSkills={allSkills.filter(s => s.id !== skill.id)}
               onRemove={() => onRemoveExample(skill.id, ex.id)}
               onUpdate={updates => onUpdateExample(skill.id, ex.id, updates)}
+              onMove={toSkillId => onMoveExample(skill.id, ex.id, toSkillId)}
             />
           ))}
 
@@ -169,8 +173,10 @@ export function ExampleDrawer({ skill, onClose, onAddExample, onUpdateExample, o
 
 type CardProps = {
   example: Example
+  otherSkills: Skill[]
   onRemove: () => void
   onUpdate: (updates: Partial<Omit<Example, 'id' | 'addedAt'>>) => void
+  onMove: (toSkillId: string) => void
 }
 
 const inputStyle = {
@@ -194,7 +200,7 @@ const labelStyle: React.CSSProperties = {
   fontFamily: 'Manrope, sans-serif',
 }
 
-function ExampleCard({ example, onRemove, onUpdate }: CardProps) {
+function ExampleCard({ example, otherSkills, onRemove, onUpdate, onMove }: CardProps) {
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState({
     title: example.title,
@@ -202,6 +208,7 @@ function ExampleCard({ example, onRemove, onUpdate }: CardProps) {
     url: example.url ?? '',
     project: example.project,
   })
+  const [moveToSkillId, setMoveToSkillId] = useState('')
 
   function set(field: keyof typeof form, value: string) {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -209,6 +216,10 @@ function ExampleCard({ example, onRemove, onUpdate }: CardProps) {
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
+    if (moveToSkillId) {
+      onMove(moveToSkillId)
+      return
+    }
     onUpdate({
       title: form.title.trim(),
       notes: form.notes.trim(),
@@ -220,6 +231,7 @@ function ExampleCard({ example, onRemove, onUpdate }: CardProps) {
 
   function handleCancel() {
     setForm({ title: example.title, notes: example.notes, url: example.url ?? '', project: example.project })
+    setMoveToSkillId('')
     setEditing(false)
   }
 
@@ -249,9 +261,22 @@ function ExampleCard({ example, onRemove, onUpdate }: CardProps) {
             {PROJECTS.map(p => <option key={p} value={p}>{p}</option>)}
           </select>
         </div>
+        <div>
+          <label style={labelStyle}>Move to another skill</label>
+          <select value={moveToSkillId} onChange={e => setMoveToSkillId(e.target.value)} style={inputStyle}>
+            <option value="">— stay here —</option>
+            {otherSkills.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+          {moveToSkillId && (
+            <p className="text-xs mt-1" style={{ color: 'rgba(218,97,241,0.8)' }}>
+              This example will move to {otherSkills.find(s => s.id === moveToSkillId)?.name}
+            </p>
+          )}
+        </div>
+
         <div className="flex gap-2 pt-1">
           <button type="submit" className="flex-1 text-xs font-bold py-2 rounded-lg cursor-pointer hover:opacity-90" style={{ backgroundColor: '#010D2D', color: '#FAF8F6' }}>
-            Save
+            {moveToSkillId ? 'Move' : 'Save'}
           </button>
           <button type="button" onClick={handleCancel} className="px-4 text-xs font-medium rounded-lg cursor-pointer hover:opacity-70" style={{ border: '1px solid rgba(1,13,45,0.2)', color: '#010D2D', backgroundColor: 'transparent' }}>
             Cancel

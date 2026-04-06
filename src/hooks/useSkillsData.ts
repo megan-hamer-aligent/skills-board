@@ -90,5 +90,17 @@ export function useSkillsData() {
     )
   }, [])
 
-  return { skills, addExample, updateExample, removeExample }
+  const moveExample = useCallback((fromSkillId: string, exampleId: string, toSkillId: string) => {
+    setSkills(prev => {
+      const example = prev.find(s => s.id === fromSkillId)?.examples.find(e => e.id === exampleId)
+      if (!example) return prev
+      return prev.map(skill => {
+        if (skill.id === fromSkillId) return { ...skill, examples: skill.examples.filter(e => e.id !== exampleId) }
+        if (skill.id === toSkillId) return { ...skill, examples: [...skill.examples, example] }
+        return skill
+      })
+    })
+  }, [])
+
+  return { skills, addExample, updateExample, removeExample, moveExample }
 }

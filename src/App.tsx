@@ -9,7 +9,7 @@ import { ExampleDrawer } from './components/ExampleDrawer'
 const PHASES: Phase[] = ['discover', 'plan', 'deliver', 'launch', 'grow']
 
 export default function App() {
-  const { skills, addExample, updateExample, removeExample } = useSkillsData()
+  const { skills, addExample, updateExample, removeExample, moveExample } = useSkillsData()
   const [activePhase, setActivePhase] = useState<Phase | null>(null)
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null)
 
@@ -83,10 +83,12 @@ export default function App() {
       {/* Example drawer */}
       <ExampleDrawer
         skill={liveSelectedSkill}
+        allSkills={skills}
         onClose={() => setSelectedSkill(null)}
         onAddExample={addExample}
         onUpdateExample={updateExample}
         onRemoveExample={removeExample}
+        onMoveExample={moveExample}
       />
     </div>
   )
