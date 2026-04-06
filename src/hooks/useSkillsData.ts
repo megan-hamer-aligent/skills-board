@@ -4,6 +4,8 @@ import { INITIAL_SKILLS } from '../data/skills'
 
 type ExamplesMap = Record<string, Example[]>
 
+export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+
 function mergeExamples(examples: ExamplesMap): Skill[] {
   return INITIAL_SKILLS.map(skill => ({
     ...skill,
@@ -22,7 +24,9 @@ function toExamplesMap(skills: Skill[]): ExamplesMap {
 export function useSkillsData() {
   const [skills, setSkills] = useState<Skill[]>(INITIAL_SKILLS)
   const [loaded, setLoaded] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Skip the first save trigger (initial load) to avoid overwriting Turso with empty state
   const skipNextSave = useRef(true)
 
@@ -44,13 +48,21 @@ export function useSkillsData() {
       skipNextSave.current = false
       return
     }
+    setSaveStatus('saving')
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(() => {
       fetch('/api/examples', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(toExamplesMap(skills)),
-      }).catch(console.error)
+      })
+        .then(r => {
+          if (!r.ok) throw new Error('save failed')
+          setSaveStatus('saved')
+          if (savedTimer.current) clearTimeout(savedTimer.current)
+          savedTimer.current = setTimeout(() => setSaveStatus('idle'), 2000)
+        })
+        .catch(() => setSaveStatus('error'))
     }, 600)
   }, [skills, loaded])
 
@@ -102,5 +114,5 @@ export function useSkillsData() {
     )
   }, [])
 
-  return { skills, addExample, updateExample, removeExample, reorderExamples }
+  return { skills, saveStatus, addExample, updateExample, removeExample, reorderExamples }
 }
