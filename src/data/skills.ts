@@ -153,6 +153,25 @@ export const INITIAL_SKILLS: Skill[] = [
 
   // ── GROW ──────────────────────────────────────────────────────────────────
   {
+    id: 'guild-meetings',
+    name: 'Guild Meetings',
+    summary: 'Contributing ideas, bringing project insights to the guild, presenting, and steering discussions.',
+    phase: 'grow',
+    intermediateStatus: 'consistently',
+    advancedStatus: 'partially',
+    seniorStatus: 'not-yet',
+    advancedGrowthNotes: [
+      'Presenting at guild meetings still developing',
+      'Steering discussions and contributing regularly as a next step',
+    ],
+    seniorGrowthNotes: [
+      'Taking temporary leadership of the guild meeting when required',
+      'Planning sessions, activities, and long-term goals',
+      'Building community, culture, and fostering growth',
+    ],
+    examples: [],
+  },
+  {
     id: 'certifications-learning',
     name: 'Certifications & Learning',
     summary: 'Building a consistent learning habit, choosing training intentionally, proactively targeting learning to expand capability breadth.',
