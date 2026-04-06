@@ -40,6 +40,7 @@ export const PROJECTS = [
   'Laser Clinics',
   'PVH',
   'Fruitbox',
+  'Vulcan',
   'Other',
 ] as const
 
