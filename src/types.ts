@@ -51,11 +51,10 @@ export const PROJECTS = [
 
 export type PhaseMeta = {
   label: string
-  icon: string
   bgStyle: React.CSSProperties
   textClass: string
-  badgeBg: string    // Tailwind class for badge bg
-  badgeText: string  // Tailwind class for badge text
+  badgeBg: string
+  badgeText: string
 }
 
 const LIGHT_PHASE_STYLE = {
@@ -66,11 +65,11 @@ const LIGHT_PHASE_STYLE = {
 }
 
 export const PHASE_META: Record<Phase, PhaseMeta> = {
-  discover: { label: 'Discover', icon: '🔍', ...LIGHT_PHASE_STYLE },
-  plan:     { label: 'Plan',     icon: '📋', ...LIGHT_PHASE_STYLE },
-  deliver:  { label: 'Deliver',  icon: '🚀', ...LIGHT_PHASE_STYLE },
-  launch:   { label: 'Launch',   icon: '🛍️', ...LIGHT_PHASE_STYLE },
-  grow:     { label: 'Grow',     icon: '📈', ...LIGHT_PHASE_STYLE },
+  discover: { label: 'Discover', ...LIGHT_PHASE_STYLE },
+  plan:     { label: 'Plan',     ...LIGHT_PHASE_STYLE },
+  deliver:  { label: 'Deliver',  ...LIGHT_PHASE_STYLE },
+  launch:   { label: 'Launch',   ...LIGHT_PHASE_STYLE },
+  grow:     { label: 'Grow',     ...LIGHT_PHASE_STYLE },
 }
 
 export const STATUS_META: Record<Status, { label: string; color: string; dot: string }> = {

@@ -1,5 +1,6 @@
 import type { Phase, Skill } from '../types'
 import { PHASE_META } from '../types'
+import { PhaseIcon } from './PhaseIcon'
 
 const PHASES: Phase[] = ['discover', 'plan', 'deliver', 'launch', 'grow']
 
@@ -31,7 +32,7 @@ export function JourneyMap({ skills, activePhase, onSelectPhase }: Props) {
                       : { ...meta.bgStyle, border: `1px solid ${(meta.bgStyle.borderColor as string)}` }
                   }
                 >
-                  <span className="text-lg">{meta.icon}</span>
+                  <PhaseIcon phase={phase} size={22} color={isActive ? '#FAF8F6' : '#010D2D'} />
                   <span
                     className="text-xs font-bold whitespace-nowrap"
                     style={{ color: isActive ? '#FAF8F6' : '#010D2D' }}

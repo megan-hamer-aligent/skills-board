@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Example, Skill } from '../types'
 import { STATUS_META, PHASE_META, PROJECTS } from '../types'
 import { ExampleForm } from './ExampleForm'
+import { PhaseIcon } from './PhaseIcon'
 
 type Props = {
   skill: Skill | null
@@ -80,7 +81,7 @@ export function ExampleDrawer({ skill, onClose, onAddExample, onUpdateExample, o
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-base">{phaseMeta.icon}</span>
+                <PhaseIcon phase={skill.phase} size={16} color="#010D2D" />
                 <span className="text-xs font-bold tracking-wide uppercase" style={{ color: '#010D2D' }}>
                   {phaseMeta.label}
                 </span>

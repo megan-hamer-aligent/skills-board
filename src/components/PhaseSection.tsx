@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import type { Phase, Skill } from '../types'
 import { PHASE_META } from '../types'
 import { SkillCard } from './SkillCard'
+import { PhaseIcon } from './PhaseIcon'
 
 type Props = {
   phase: Phase
@@ -28,7 +29,7 @@ export function PhaseSection({ phase, skills, isActive, onSelectSkill }: Props) 
         className="flex items-center gap-3 mb-6 p-4 rounded-xl border"
         style={meta.bgStyle}
       >
-        <span className="text-3xl">{meta.icon}</span>
+        <PhaseIcon phase={phase} size={28} color="#010D2D" />
         <div>
           <h2
             className="text-lg font-bold"
