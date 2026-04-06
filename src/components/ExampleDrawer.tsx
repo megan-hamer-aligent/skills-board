@@ -108,6 +108,12 @@ export function ExampleDrawer({ skill, onClose, onAddExample, onUpdateExample, o
                 {senMeta.label}
               </span>
             </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs" style={{ color: 'rgba(1,13,45,0.4)' }}>Expert</span>
+              <span className="text-xs px-2 py-0.5 rounded-full font-medium text-slate-400 bg-slate-100">
+                Not Yet
+              </span>
+            </div>
           </div>
         </div>
 
